@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator
 
 
 
@@ -17,22 +16,6 @@ class VocabularyEntry(models.Model):
 
     def __str__(self):
         return self.concept
-
-    def get_quiz_options(self, language='he', count=4):
-        """Helper for API to get question + options"""
-        from django.db.models import Q
-        correct = self.words.filter(language=language, is_correct=True).first()
-        incorrect = list(self.words.filter(
-            Q(language=language) & Q(is_correct=False)
-        ).exclude(text=correct.text))
-
-        options = [correct] + random.sample(incorrect, min(count - 1, len(incorrect)))
-        random.shuffle(options)
-        return {
-            'question': self.arabic_text,
-            'options': [{'id': w.id, 'text': w.text} for w in options],
-            'correct_id': correct.id
-        }
 
 
 class Vocabulary(models.Model):

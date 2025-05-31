@@ -1,11 +1,15 @@
 from rest_framework import serializers
 from .models import VocabularyEntry, Vocabulary, GameSession, GameResponse
 
+
 class VocabularyEntrySerializer(serializers.ModelSerializer):
+    image = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = VocabularyEntry
-        fields = ['id', 'concept', 'hint', 'arabic_text', 'hebrew_text', 'created_at']
-        read_only_fields = ('created_at',) # 'created_at' is auto_now_add
+        fields = ['id', 'concept', 'hint', 'arabic_text', 'hebrew_text', 'image', 'created_at']
+        read_only_fields = ('created_at',)
+
 
 class VocabularySerializer(serializers.ModelSerializer):
     class Meta:
