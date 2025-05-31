@@ -1,8 +1,9 @@
 import random
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import VocabularyEntry, Word, PlayerScore
-from .serializers import QuizSerializer, WordSerializer, PlayerScoreSerializer
+from rest_framework import status
+from .models import VocabularyEntry, Word, Player, Score
+from .serializers import QuizSerializer, WordSerializer, PlayerSerializer, ScoreSerializer
 
 @api_view(['GET'])
 def get_quiz_question(request):
@@ -44,8 +45,31 @@ def get_quiz_question(request):
 
     return Response(response_data)
 
+@api_view(['POST'])
+def player_create(request):
+    serializer = PlayerSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def score_create(request):
+    serializer = ScoreSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET'])
 def player_scores_list(request):
-    scores = PlayerScore.objects.all()
-    serializer = PlayerScoreSerializer(scores, many=True)
-    return Response(serializer.data)
+    # Example: return all players with their scores
+    players = Player.objects.all()
+    data = []
+    for player in players:
+        scores = Score.objects.filter(player=player)
+        data.append({
+            'player': PlayerSerializer(player).data,
+            'scores': ScoreSerializer(scores, many=True).data,
+        })
+    return Response(data)

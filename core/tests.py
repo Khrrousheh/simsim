@@ -2,9 +2,9 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework.test import APIClient
-from .models import VocabularyEntry, Word, PlayerScore
-from rest_framework.test import APITestCase
+from .models import VocabularyEntry, Word, Player, Score
 from rest_framework import status
+from rest_framework.test import APIClient
 
 # model validation test
 class WordValidationTest(TestCase):
@@ -57,25 +57,27 @@ class QuizAPITestCase(TestCase):
         # GIF is optional, so we just verify field exists
         self.assertIn('gif', response.json())
 
-class PlayerScoreAPITest(APITestCase):
+class PlayerScoreAPITest(TestCase):
     def setUp(self):
-        # Create some test data
-        PlayerScore.objects.create(name="Alice", score=50)
-        PlayerScore.objects.create(name="Bob", score=75)
+        self.client = APIClient()
+        self.player_create_url = reverse('player-create')  # URL name for creating player
+        self.score_create_url = reverse('score-create')    # URL name for creating score
 
-    def test_get_all_scores(self):
-        url = reverse('player_scores_list')
-        response = self.client.get(url)
+    def test_create_player(self):
+        data = {"name": "Alice"}
+        response = self.client.post(self.player_create_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Player.objects.count(), 1)
+        self.assertEqual(Player.objects.get().name, "Alice")
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-        
-        # Check the content of response
-        expected_names = {"Alice", "Bob"}
-        returned_names = {item['name'] for item in response.data}
-        self.assertEqual(returned_names, expected_names)
-        
-        # Optionally check scores as well
-        scores = {item['score'] for item in response.data}
-        self.assertIn(50, scores)
-        self.assertIn(75, scores)
+    def test_add_score_for_player_success(self):
+        player = Player.objects.create(name="Alice")
+        data = {"player": player.id, "score": 42}  # Ensure this matches your serializer field
+        response = self.client.post(self.score_create_url, data, format='json')
+        print(response.data)  # Debug output
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_add_score_for_nonexistent_player(self):
+        data = {"player": 9999, "score": 100}  # Non-existent player ID
+        response = self.client.post(self.score_create_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

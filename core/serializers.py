@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import VocabularyEntry, Word, PlayerScore
+from .models import VocabularyEntry, Word, Player, Score
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,7 +12,15 @@ class QuizSerializer(serializers.Serializer):
     options = WordSerializer(many=True)
     gif = serializers.FileField(required=False)
 
-class PlayerScoreSerializer(serializers.ModelSerializer):
+class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PlayerScore
-        fields = ['name', 'score']
+        model = Player
+        fields = ['id', 'name']
+
+class ScoreSerializer(serializers.ModelSerializer):
+    player = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all())
+
+    class Meta:
+        model = Score
+        fields = ['id', 'player', 'value', 'created_at']
+        read_only_fields = ['created_at']

@@ -40,9 +40,10 @@ class Answer(models.Model):
     def __str__(self):
         return f"{'✅' if self.is_correct else '❌'} {self.selected_word.text}"
     
-class PlayerScore(models.Model):
-    name = models.CharField(max_length=100)
-    score = models.IntegerField()
+class Player(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
-    def __str__(self):
-        return f"{self.name} - {self.score}"
+class Score(models.Model):
+    player = models.ForeignKey(Player, related_name='scores', on_delete=models.CASCADE)
+    value = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
