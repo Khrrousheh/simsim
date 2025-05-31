@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'import_export',
-    'core',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
