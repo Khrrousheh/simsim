@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import VocabularyEntry, Word
+from .models import VocabularyEntry, Word, PlayerScore
 
 class WordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,3 +11,8 @@ class QuizSerializer(serializers.Serializer):
     question_language = serializers.CharField()
     options = WordSerializer(many=True)
     gif = serializers.FileField(required=False)
+
+class PlayerScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlayerScore
+        fields = ['name', 'score']

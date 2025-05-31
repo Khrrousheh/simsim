@@ -1,8 +1,8 @@
 import random
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import VocabularyEntry, Word
-from .serializers import QuizSerializer, WordSerializer
+from .models import VocabularyEntry, Word, PlayerScore
+from .serializers import QuizSerializer, WordSerializer, PlayerScoreSerializer
 
 @api_view(['GET'])
 def get_quiz_question(request):
@@ -43,3 +43,9 @@ def get_quiz_question(request):
     }
 
     return Response(response_data)
+
+@api_view(['GET'])
+def player_scores_list(request):
+    scores = PlayerScore.objects.all()
+    serializer = PlayerScoreSerializer(scores, many=True)
+    return Response(serializer.data)

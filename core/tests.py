@@ -1,9 +1,10 @@
 from django.test import TestCase
-from core.models import VocabularyEntry, Word
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework.test import APIClient
-from .models import VocabularyEntry, Word
+from .models import VocabularyEntry, Word, PlayerScore
+from rest_framework.test import APITestCase
+from rest_framework import status
 
 # model validation test
 class WordValidationTest(TestCase):
@@ -55,3 +56,26 @@ class QuizAPITestCase(TestCase):
 
         # GIF is optional, so we just verify field exists
         self.assertIn('gif', response.json())
+
+class PlayerScoreAPITest(APITestCase):
+    def setUp(self):
+        # Create some test data
+        PlayerScore.objects.create(name="Alice", score=50)
+        PlayerScore.objects.create(name="Bob", score=75)
+
+    def test_get_all_scores(self):
+        url = reverse('player_scores_list')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        
+        # Check the content of response
+        expected_names = {"Alice", "Bob"}
+        returned_names = {item['name'] for item in response.data}
+        self.assertEqual(returned_names, expected_names)
+        
+        # Optionally check scores as well
+        scores = {item['score'] for item in response.data}
+        self.assertIn(50, scores)
+        self.assertIn(75, scores)

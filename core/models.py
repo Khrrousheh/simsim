@@ -39,3 +39,10 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"{'✅' if self.is_correct else '❌'} {self.selected_word.text}"
+    
+class PlayerScore(models.Model):
+    name = models.CharField(max_length=100)
+    score = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} - {self.score}"
